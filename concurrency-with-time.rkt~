@@ -1,0 +1,44 @@
+#lang racket
+
+(require data/queue)
+(require racket/control)
+(require racket/engine)
+
+(define tasks (make-queue))
+
+(define addTask
+  (lambda (t type)
+    (if (eq? type 'engine)
+        (enqueue! tasks (engine (lambda (s) (t))))
+        (enqueue! tasks t))))
+
+(define run
+  (lambda ()
+    (if (queue-empty? tasks)
+        (void)
+        (begin (reset (let ([t (dequeue! tasks)])
+                        (if (engine? t)
+                            (if (engine-run 0.1 t)
+                                (engine-result t)
+                                (enqueue! tasks t))
+                            (t))))
+               (run)))))
+
+(define sched
+  (lambda ()
+    (shift k (addTask k 'engine))))
+
+(define sum
+  (lambda (n)
+    (sched)
+    ;; (println "here")
+    (if (= n 0)
+        0
+        (+ n (sum (- n 1))))))
+
+
+(addTask (lambda () (println (sum 7))) 'engine)
+(addTask (lambda () (println (sum 3))) 'engine)
+(addTask (lambda () (println (sum 5))) 'engine)
+
+(run)
