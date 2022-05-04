@@ -78,7 +78,7 @@
          (lambda (v)
            (call/cc (lambda (k1)
                       (set! pstack (cons k1 pstack))
-                      (k v))))))))))
+                      (k v)))))))))) ; the continuation of (k v) is empty, cuz go call at reset. so this k is the entire computation, the value of (k v) is the result of thunk, not jump
 
 ; ------------------------------- Syntactic sugar
 
