@@ -294,3 +294,10 @@
 	(let ((f (lambda (v) (push-subcont sk v))))
 	  (push-prompt p e1 e2 ...))))))
 
+
+;; test ===========================
+(define default-prompt (new-prompt))
+(define my-prompt (new-prompt))
+(push-prompt default-prompt (+ 10 (push-prompt my-prompt (+ 20  (shift default-prompt k (+ 100 (k (k 2))))))))
+
+;;(+ 100  (push-prompt default-prompt (+ 3 2) (+ 10 2 (push-prompt my-prompt (+ 1 1)))))
