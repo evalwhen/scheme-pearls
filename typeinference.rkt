@@ -98,6 +98,7 @@
           (walk* (cdr v) s))]
         [else v]))))
 
+;; extend s with new (var val) pair
 (define unify
   (lambda (u v s)
     (let ([u (walk u s)]
@@ -123,6 +124,7 @@
     (string->symbol
      (string-append name-prefix (number->string n)))))
 
+;; replace var with real val from s
 (define reify-s
   (lambda (v s)
     (let ([v (walk v s)])
