@@ -123,16 +123,16 @@
 
 (define go #f)
 (let ((v
-	(call/cc
-	  (lambda (k)
-	    (set! go k)
-	    (k #f)))))
+       (call/cc
+        (lambda (k)
+          (set! go k)
+          (k #f)))))
   (if v
-    (let* ((r (v))
-	   (h (car pstack))
-	   (_ (set! pstack (cdr pstack))))
-      ((cdr h) (lambda () r)))	; does not return
-    ))
+      (let* ((r (v))
+             (h (car pstack))
+             (_ (set! pstack (cdr pstack))))
+        ((cdr h) (lambda () r)))        ; does not return
+      ))
 
 ; As in OCaml, a prompt is a ref unit. We rely on generativity of ref cells
 (define (new-prompt) (list #f))
@@ -147,9 +147,9 @@
 
 (define (push-prompt* p th)
   ((call/cc
-     (lambda (k)
-       (set! pstack (cons (cons p k) pstack))
-       (go th)))))			; does not return
+    (lambda (k)
+      (set! pstack (cons (cons p k) pstack))
+      (go th)))))			; does not return
 
 ;; let rec unwind acc mark = function
 ;;   | []   -> failwith "No prompt was set" 
@@ -158,16 +158,16 @@
 
 (define (unwind acc p pstack)
   (if (null? pstack) (error "No prompt was set")
-    (if (eq? p (caar pstack))
-      (cons pstack acc)
-      (unwind (cons (car pstack) acc) p (cdr pstack)))))
+      (if (eq? p (caar pstack))
+          (cons pstack acc)
+          (unwind (cons (car pstack) acc) p (cdr pstack)))))
 
 ; The same as above, but the removed frames are disregarded
 (define (unwind-abort p pstack)
   (if (null? pstack) (error "No prompt was set")
-    (if (eq? p (caar pstack))
-      pstack
-      (unwind-abort p (cdr pstack)))))
+      (if (eq? p (caar pstack))
+          pstack
+          (unwind-abort p (cdr pstack)))))
 
 ;; let take_subcont (p : 'b prompt) (f : ('a,'b) subcont -> unit -> 'b) : 'a =
 ;;   let pa = new_prompt () in
@@ -191,11 +191,11 @@
 
 (define (take-SC p f)
   ((call/cc
-     (lambda (k)			; stack fragment
-       (let* ((subchain-pstack (unwind '() p pstack))
-	      (_ (set! pstack (car subchain-pstack)))
-	      (subchain (cdr subchain-pstack)))
-	 (go (f (vector k p subchain)))))))) ; returns when k is invoked
+    (lambda (k)                         ; stack fragment
+      (let* ((subchain-pstack (unwind '() p pstack))
+             (_ (set! pstack (car subchain-pstack)))
+             (subchain (cdr subchain-pstack)))
+        (go (f (vector k p subchain)))))))) ; returns when k is invoked
 
 ;; let push_subcont (sk : ('a,'b) subcont) (m : unit -> 'a) : 'b =
 ;;   let pb = sk.subcont_pb in
@@ -210,35 +210,35 @@
 
 (define (push-SC sk m)
   ((call/cc
-     (lambda (k)
-       (let ((p** (new-prompt))
-	     (ekfragment (vector-ref sk 0))
-	     (subchain (vector-ref sk 2)))
-       (set! pstack (cons (cons p** k) pstack))
-       (for-each
-	 (lambda (frame)
-	   (set! pstack (cons frame pstack)))
-	 subchain)
-       (ekfragment m))))))
+    (lambda (k)
+      (let ((p** (new-prompt))
+            (ekfragment (vector-ref sk 0))
+            (subchain (vector-ref sk 2)))
+        (set! pstack (cons (cons p** k) pstack))
+        (for-each
+         (lambda (frame)
+           (set! pstack (cons frame pstack)))
+         subchain)
+        (ekfragment m))))))
 
 (define (push-delim-SC sk m)
   ((call/cc
-     (lambda (k)
-       (let ((p (vector-ref sk 1))
-	     (ekfragment (vector-ref sk 0))
-	     (subchain (vector-ref sk 2)))
-       (set! pstack (cons (cons p k) pstack))
-       (for-each
-	 (lambda (frame)
-	   (set! pstack (cons frame pstack)))
-	 subchain)
-       (ekfragment m))))))
+    (lambda (k)
+      (let ((p (vector-ref sk 1))
+            (ekfragment (vector-ref sk 0))
+            (subchain (vector-ref sk 2)))
+        (set! pstack (cons (cons p k) pstack))
+        (for-each
+         (lambda (frame)
+           (set! pstack (cons frame pstack)))
+         subchain)
+        (ekfragment m))))))
 
 ; A more efficient variation of take-SC, which does not capture
 ; any continuation.
 (define (abort* p th)
   (let* ((pstack-new (unwind-abort p pstack))
-	 (h (car pstack-new)))
+         (h (car pstack-new)))
     (set! pstack (cdr pstack-new))
     ((cdr h) th)))			; does not return
 
@@ -250,7 +250,7 @@
 
 (define-syntax push-prompt
   (syntax-rules ()
-    ((_ p e1 e2 ...) (push-prompt* p (lambda () e1 e2 ...)))))
+    ((_ p e1 e2 \.\.\.) (push-prompt* p (lambda () e1 e2 \.\.\.)))))
 
 (define-syntax abortP
   (syntax-rules ()
@@ -259,33 +259,33 @@
 
 (define-syntax take-subcont
   (syntax-rules ()
-    ((_ p sk e1 e2 ...)
-      (take-SC p (lambda (sk) (lambda () e1 e2 ...))))))
+    ((_ p sk e1 e2 \.\.\.)
+     (take-SC p (lambda (sk) (lambda () e1 e2 \.\.\.))))))
 
 (define-syntax push-subcont
   (syntax-rules ()
-    ((_ sk e1 e2 ...)
-      (push-SC sk (lambda () e1 e2 ...)))))
+    ((_ sk e1 e2 \.\.\.)
+     (push-SC sk (lambda () e1 e2 \.\.\.)))))
 
 (define-syntax push-delim-subcont
   (syntax-rules ()
-    ((_ sk e1 e2 ...)
-      (push-delim-SC sk (lambda () e1 e2 ...)))))
+    ((_ sk e1 e2 \.\.\.)
+     (push-delim-SC sk (lambda () e1 e2 \.\.\.)))))
 
 ; The reified continuation takes a value rather than an action
 (define-syntax shift
   (syntax-rules ()
-    ((_ p f e1 e2 ...)
-      (take-subcont p sk
-	(let ((f (lambda (v) (push-delim-subcont sk v))))
-	  (push-prompt p e1 e2 ...))))))
+    ((_ p f e1 e2 \.\.\.)
+     (take-subcont p sk
+                   (let ((f (lambda (v) (push-delim-subcont sk v))))
+                     (push-prompt p e1 e2 \.\.\.))))))
 
 (define-syntax shift0
   (syntax-rules ()
-    ((_ p f e1 e2 ...)
-      (take-subcont p sk
-	(let ((f (lambda (v) (push-delim-subcont sk v))))
-	  e1 e2 ...)))))
+    ((_ p f e1 e2 \.\.\.)
+     (take-subcont p sk
+                   (let ((f (lambda (v) (push-delim-subcont sk v))))
+                     e1 e2 \.\.\.)))))
 
 (define-syntax control
   (syntax-rules ()
@@ -294,3 +294,10 @@
 	(let ((f (lambda (v) (push-subcont sk v))))
 	  (push-prompt p e1 e2 ...))))))
 
+
+;; test ===========================
+(define default-prompt (new-prompt))
+(define my-prompt (new-prompt))
+(push-prompt default-prompt (+ 10 (push-prompt my-prompt (+ 20  (shift default-prompt k (+ 100 (k (k 2))))))))
+
+;;(+ 100  (push-prompt default-prompt (+ 3 2) (+ 10 2 (push-prompt my-prompt (+ 1 1)))))

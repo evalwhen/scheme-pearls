@@ -16,3 +16,10 @@
 (reset
   (+ 1 (shift k (let ([x (k 1)] [y (k 2)])
                      (k (* x y))))))
+
+
+(define (leak-test1 identity-thunk)
+  (let loop ((id (lambda (x) x)))
+    (loop (id (identity-thunk)))))
+
+(leak-test1 (lambda () (reset (shift k k))))
