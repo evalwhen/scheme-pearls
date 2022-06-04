@@ -136,7 +136,10 @@
 
 (define reify
   (lambda (v s)
+    (println v)
+    (println s)
     (let ([v (walk* v s)])
+      (println v)
       (walk* v (reify-s v empty-s)))))
 
 
@@ -226,15 +229,15 @@
                (+ 1 (* x y)))
              2 3))
 
-(typecheck '(lambda (x : ?) : ?
-              (* x x)))
+;; (typecheck '(lambda (x : ?) : ?
+;;               (* x x)))
 
-(typecheck '((lambda (x : ?) : ?
-              (* x x))
-             3))
+;; (typecheck '((lambda (x : ?) : ?
+;;               (* x x))
+;;              3))
 
-(typecheck '(lambda (x : ?) (y : ?) : ?
-              (+ 1 (* x y))))
+;; (typecheck '(lambda (x : ?) (y : ?) : ?
+;;               (+ 1 (* x y))))
 
 (typecheck '(lambda (x : ?) (y : ?) : ?
               (< 1 (* x y))))
