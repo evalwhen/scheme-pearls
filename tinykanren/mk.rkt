@@ -41,13 +41,13 @@
     (let ([u (walk u s)]
           [v (walk v s)])
       (cond
-        [(eq? u v) s]
+        [(eq? u v) s] ;; same variable
         [(var? u) (ext-s u v s)]
         [(var? v) (ext-s v u s)]
         [(and (pair? u) (pair? v))
          (let ([s (unify (car u) (car v) s)])
            (and s (unify (cdr u) (cdr v) s)))]
-        [(equal? u v) s]
+        [(equal? u v) s] ;; equal value
         [else #f]))))
 
 (define name-prefix "_")
