@@ -36,6 +36,7 @@
           (walk* (cdr v) s))]
         [else v]))))
 
+;; extend substitution
 (define unify
   (lambda (u v s)
     (let ([u (walk u s)]
