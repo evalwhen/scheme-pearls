@@ -73,6 +73,8 @@
                   (reify-s (car v) s))]
         [else s]))))
 
+;; if v is value, just return
+;; if v is var? and unbinded, will extend s with a unique name
 (define reify
   (lambda (v s)
     (let ([v (walk* v s)])
