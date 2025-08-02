@@ -41,6 +41,16 @@
             (lambda () (nd-recur f z (list (cdr choice)))))))
    nd-lst))
 
+;;
+(define (nd-recur-simple f z lst)
+  (if (null? lst)
+      z  ; 空列表返回基值
+      (let ((h (car lst))
+            (t (cdr lst)))
+        ;; 直接调用 f，传入所有参数
+        (f h t (lambda () (nd-recur f z t))))))
+
+
 
 ;;; ======================
 ;;; 修正后的列表操作函数
