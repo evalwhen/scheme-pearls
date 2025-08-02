@@ -4,6 +4,7 @@
 ;;; 修正后的非确定性 DSL 实现
 ;;; ======================
 
+(define (nd-nil) '(()))
 (define (nd-fail) '())  ; 失败：无选择
 
 (define (nd-choice a b) ; 非确定性选择：合并选择集
@@ -20,6 +21,16 @@
   (apply append (map f lst)))
 
 ;; 递归原语 recur (修正版)
+;; 把 nd-nil 看作 nil, 以下 nd-recur 的实现满足等式组1:
+;; recur c n nil        ≡ n
+;; recur c n (cons h t) ≡ c (h,t) (fun () -> recur c n t)
+;; 以下为论证过程
+;; (nd-recur f n nd-nil) = z
+
+;; (nd-recur f n nd-lst) =
+;; (nd-recur f n (nd-list '(1 2))) =
+;; (nd-recur f n '((1 2))) =
+;; (f 1 (2) (lambda () (nd-recur f z '((2)))))
 (define (nd-recur f z nd-lst)
   (concat-map
    (lambda (choice)
