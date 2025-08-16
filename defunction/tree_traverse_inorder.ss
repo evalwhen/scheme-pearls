@@ -14,12 +14,12 @@
 
 
 ;; 版本2
-(define (inorder-cps tree k)
+(define (inorder-rec-cps tree k)
   (if (leaf? tree)
       (k '())
-      (inorder-cps (left tree)
+      (inorder-rec-cps (left tree)
                        (lambda (left-vals)
-                         (inorder-cps (right tree)
+                         (inorder-rec-cps (right tree)
                                               (lambda (right-vals)
                                                 (k (append left-vals
                                                            (cons (value tree) right-vals)))))))))
